@@ -87,7 +87,7 @@ Modify the following files:
         system.l2.mem_side = system.membus.slave
   ```
 
-Command(add --l3cache):
+Command (add --l3cache):
 ```shell
 ./build/X86/gem5.opt configs/example/se.py -c tests/test-progs/hello/bin/x86/linux/hello --cpu-type=TimingSimpleCPU --caches --l2cache --l3cache --mem-type=NVMainMemory --nvmain-config=../NVmain/Config/PCM_ISSCC_2012_4GB.config > Q2_log.txt
 ```
@@ -111,4 +111,21 @@ Command(add --l3cache):
 - full-way:
 ```shell
 ./build/X86/gem5.opt configs/example/se.py -c tests/test-progs/benchmark/quicksort --cpu-type=TimingSimpleCPU --caches --l2cache --l3cache --l3_assoc=8192 --l1i_size=32kB --l1d_size=32kB --l2_size=128kB --l3_size=512kB --mem-type=NVMainMemory --nvmain-config=../NVmain/Config/PCM_ISSCC_2012_4GB.config > Q3_full-way_512kB_log.txt
+```
+
+### Q4
+Modify Caches.py (add the following line in L3Cache class):
+```python
+replacement_policy = Param.BaseReplacementPolicy(LFURP(),"Replacement policy")
+```
+
+測試:
+program: quicksort
+l3_assoc: 2
+l3_size: 128kB, 256kB, 512kB, 1MB (其餘的cache size follow benchmark規定)
+1MB時看不出差異
+
+Command(take l3_size=128kB as an example):
+```shell
+./build/X86/gem5.opt configs/example/se.py -c tests/test-progs/benchmark/quicksort --cpu-type=TimingSimpleCPU --caches --l2cache --l3cache --l3_assoc=2 --l1i_size=32kB --l1d_size=32kB --l2_size=128kB --l3_size=128kB --mem-type=NVMainMemory --nvmain-config=../NVmain/Config/PCM_ISSCC_2012_4GB.config > Q4_lfu_128kB_log.txt
 ```
