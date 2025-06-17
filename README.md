@@ -1,4 +1,4 @@
-# computer-organization-final-project
+# Computer Organization Final Project
 
 ### Q1
 Follow the instructions in the slides.
@@ -23,24 +23,15 @@ Modify the following files:
 - Xbar.py
   ```python
   class L3XBar(CoherentXBar):
-    # 256-bit crossbar by default
     width = 32
 
-    # Assume that most of this is covered by the cache latencies, with
-    # no more than a single pipeline stage for any packet.
     frontend_latency = 1
     forward_latency = 0
     response_latency = 1
     snoop_response_latency = 1
 
-    # Use a snoop-filter by default, and set the latency to zero as
-    # the lookup is assumed to overlap with the frontend latency of
-    # the crossbar
     snoop_filter = SnoopFilter(lookup_latency = 0)
 
-    # This specialisation of the coherent crossbar is to be considered
-    # the point of unification, it connects the dcache and the icache
-    # to the first level of unified cache.
     point_of_unification = True
   ```
 - BaseCPU.py
@@ -68,9 +59,6 @@ Modify the following files:
   ```
   ```python
   if options.l2cache and options.l3cache:
-        # Provide a clock for the L2 and the L1-to-L2 bus here as they
-        # are not connected using addTwoLevelCacheHierarchy. Use the
-        # same clock as the CPUs.
         system.l2 = l2_cache_class(clk_domain=system.cpu_clk_domain,
                                    size=options.l2_size,
                                    assoc=options.l2_assoc)
@@ -90,9 +78,6 @@ Modify the following files:
         system.l3.mem_side = system.membus.slave
 
     elif options.l2cache:
-        # Provide a clock for the L2 and the L1-to-L2 bus here as they
-        # are not connected using addTwoLevelCacheHierarchy. Use the
-        # same clock as the CPUs.
         system.l2 = l2_cache_class(clk_domain=system.cpu_clk_domain,
                                    size=options.l2_size,
                                    assoc=options.l2_assoc)
@@ -101,3 +86,29 @@ Modify the following files:
         system.l2.cpu_side = system.tol2bus.master
         system.l2.mem_side = system.membus.slave
   ```
+
+Command(add --l3cache):
+```shell
+./build/X86/gem5.opt configs/example/se.py -c tests/test-progs/hello/bin/x86/linux/hello --cpu-type=TimingSimpleCPU --caches --l2cache --l3cache --mem-type=NVMainMemory --nvmain-config=../NVmain/Config/PCM_ISSCC_2012_4GB.config > Q2_log.txt
+```
+
+### Q3
+1. L3 cache size = 1MB (miss rate相同)
+- 2-way:
+```shell
+./build/X86/gem5.opt configs/example/se.py -c tests/test-progs/benchmark/quicksort --cpu-type=TimingSimpleCPU --caches --l2cache --l3cache --l3_assoc=2 --l1i_size=32kB --l1d_size=32kB --l2_size=128kB --l3_size=1MB --mem-type=NVMainMemory --nvmain-config=../NVmain/Config/PCM_ISSCC_2012_4GB.config > Q3_2-way_log.txt 
+```
+- full-way:
+```shell
+./build/X86/gem5.opt configs/example/se.py -c tests/test-progs/benchmark/quicksort --cpu-type=TimingSimpleCPU --caches --l2cache --l3cache --l3_assoc=16384 --l1i_size=32kB --l1d_size=32kB --l2_size=128kB --l3_size=1MB --mem-type=NVMainMemory --nvmain-config=../NVmain/Config/PCM_ISSCC_2012_4GB.config > Q3_full-way_log.txt
+```
+
+2. L3 cache size = 512kB (miss rate有差異)
+- 2-way:
+```shell
+./build/X86/gem5.opt configs/example/se.py -c tests/test-progs/benchmark/quicksort --cpu-type=TimingSimpleCPU --caches --l2cache --l3cache --l3_assoc=2 --l1i_size=32kB --l1d_size=32kB --l2_size=128kB --l3_size=512kB --mem-type=NVMainMemory --nvmain-config=../NVmain/Config/PCM_ISSCC_2012_4GB.config > Q3_2-way_512kB_log.txt
+```
+- full-way:
+```shell
+./build/X86/gem5.opt configs/example/se.py -c tests/test-progs/benchmark/quicksort --cpu-type=TimingSimpleCPU --caches --l2cache --l3cache --l3_assoc=8192 --l1i_size=32kB --l1d_size=32kB --l2_size=128kB --l3_size=512kB --mem-type=NVMainMemory --nvmain-config=../NVmain/Config/PCM_ISSCC_2012_4GB.config > Q3_full-way_512kB_log.txt
+```
