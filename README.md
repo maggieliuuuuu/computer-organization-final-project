@@ -385,7 +385,7 @@ l3_assoc: 2-way, 4-way
 l3_size: 128kB, 256kB, 512kB, 1MB (其餘的cache size follow benchmark規定)
 ```
 
-Command(take l3_size=1MB as an example):
+Command (take l3_size=1MB as an example):
 - 2-way:
 ```shell
 ./build/X86/gem5.opt configs/example/se.py -c tests/test-progs/benchmark/quicksort --cpu-type=TimingSimpleCPU --caches --l2cache --l3cache --l3_assoc=2 --l1i_size=32kB --l1d_size=32kB --l2_size=128kB --l3_size=1MB --mem-type=NVMainMemory --nvmain-config=../NVmain/Config/PCM_ISSCC_2012_4GB.config > NVMain.log
@@ -393,4 +393,29 @@ Command(take l3_size=1MB as an example):
 - 4-way:
 ```shell
 ./build/X86/gem5.opt configs/example/se.py -c tests/test-progs/benchmark/quicksort --cpu-type=TimingSimpleCPU --caches --l2cache --l3cache --l3_assoc=4--l1i_size=32kB --l1d_size=32kB --l2_size=128kB --l3_size=1MB --mem-type=NVMainMemory --nvmain-config=../NVmain/Config/PCM_ISSCC_2012_4GB.config > NVMain.log
+```
+
+### Q5
+- Write back: default, just run.
+
+- Write through: modify base.cc (add the following lines)
+```c++
+if (blk->isWritable()) {
+	PacketPtr writeclean_pkt = writecleanBlk(blk, pkt->req->getDest(), pkt->id);
+	writebacks.push_back(writeclean_pkt);
+}
+```
+
+測試:
+
+```
+program: multiply
+l3_assoc: 4-way
+l3_size: 128kB, 1MB (其餘的cache size follow benchmark規定)
+replacement policy: LRU, FBRP
+```
+
+Command (take l3_size=1MB as an example):
+```shell
+./build/X86/gem5.opt configs/example/se.py -c tests/test-progs/benchmark/multiply --cpu-type=TimingSimpleCPU --caches --l2cache --l3cache --l3_assoc=4 --l1i_size=32kB --l1d_size=32kB --l2_size=128kB --l3_size=1MB --mem-type=NVMainMemory --nvmain-config=../NVmain/Config/PCM_ISSCC_2012_4GB.config > NVMain.log
 ```
