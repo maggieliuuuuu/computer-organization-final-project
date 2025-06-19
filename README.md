@@ -3,6 +3,11 @@
 ### Q1
 Follow the instructions in the slides.
 
+Key points:
+- gem5: an open source computer architecture simulator
+- NVMain: an architectural level main memory simulator for emerging non-volatile memories
+- gem5 and NVMain can be integrated to simulate non-volatile memory systems.
+
 ### Q2
 Modify the following files:
 - Options.py
