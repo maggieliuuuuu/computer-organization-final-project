@@ -404,7 +404,7 @@ l3_assoc: 2-way, 4-way
 l3_size: 128kB, 256kB, 512kB, 1MB (其餘的cache size follow benchmark規定)
 ```
 
-Command (take l3_size=1MB as an example):
+<!--Command (take l3_size=1MB as an example):
 - 2-way:
 ```shell
 ./build/X86/gem5.opt configs/example/se.py -c tests/test-progs/benchmark/quicksort --cpu-type=TimingSimpleCPU --caches --l2cache --l3cache --l3_assoc=2 --l1i_size=32kB --l1d_size=32kB --l2_size=128kB --l3_size=1MB --mem-type=NVMainMemory --nvmain-config=../NVmain/Config/PCM_ISSCC_2012_4GB.config > NVMain.log
@@ -412,7 +412,15 @@ Command (take l3_size=1MB as an example):
 - 4-way:
 ```shell
 ./build/X86/gem5.opt configs/example/se.py -c tests/test-progs/benchmark/quicksort --cpu-type=TimingSimpleCPU --caches --l2cache --l3cache --l3_assoc=4--l1i_size=32kB --l1d_size=32kB --l2_size=128kB --l3_size=1MB --mem-type=NVMainMemory --nvmain-config=../NVmain/Config/PCM_ISSCC_2012_4GB.config > NVMain.log
-```
+``` -->
+
+Key points:
+- FBRP is not merely LFU, it is like a mix of LFU and LRU.
+- I just modified fb_rp.hh & fb_rp.cc based on lfu_rp.hh and lfu_rp.cc (add lastTouchTick in LRU into it & modify the replacement logic according to the slides)
+
+Result & Analysis:
+- 2-way時1MB看不出差異，其餘大小的結果皆為LRU的replacement次數較少
+- 4-way時1MB皆沒有replacement，512kB及256kB時的結果皆為LRU的replacement次數較少，128kB時結果則為FBRP的replacement次數較少
 
 ### Q5
 - Write back: default, just run.
