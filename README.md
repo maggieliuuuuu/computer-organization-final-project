@@ -129,7 +129,7 @@ Result & Analysis:
 - 128kB及256kB時2-way的miss rate較低 => size太小因此capacity misses影響較大
 
 ### Q4
-Add fb_rp.hh (modified based on lfu_rp.hh and lru_rp.hh):
+Add ./src/mem/cache/replacement_policies/fb_rp.hh (modified based on lfu_rp.hh and lru_rp.hh):
 ```c++
 /**
  * Copyright (c) 2018 Inria
@@ -255,7 +255,7 @@ class FBRP : public BaseReplacementPolicy
 #endif // __MEM_CACHE_REPLACEMENT_POLICIES_FB_RP_HH__
 ```
 
-Add fb_rp.cc (modified based on lfu_rp.cc and lru_rp.cc):
+Add ./src/mem/cache/replacement_policies/fb_rp.cc (modified based on lfu_rp.cc and lru_rp.cc):
 ```c++
 /**
  * Copyright (c) 2018 Inria
@@ -378,7 +378,7 @@ FBRPParams::create()
 }
 ```
 
-Modify ReplacementPolicies.py:
+Modify ./src/mem/cache/replacement_policies/ReplacementPolicies.py:
 ```python
 class FBRP(BaseReplacementPolicy):
     type = 'FBRP'
@@ -386,12 +386,12 @@ class FBRP(BaseReplacementPolicy):
     cxx_header = "mem/cache/replacement_policies/fb_rp.hh"
 ```
 
-Modify SConscript:
+Modify ./src/mem/cache/replacement_policies/SConscript:
 ```python
 Source('fb_rp.cc')
 ```
 
-Modify Caches.py (add the following line in L3Cache class):
+Modify ./configs/common/Caches.py (add the following line in L3Cache class):
 ```python
 replacement_policy = Param.BaseReplacementPolicy(FBRP(),"Replacement policy")
 ```
@@ -425,7 +425,7 @@ Result & Analysis:
 ### Q5
 - Write back: default, just run.
 
-- Write through: modify base.cc (add the following lines)
+- Write through: modify src/mem/cache/base.cc (add the following lines)
 ```c++
 if (blk->isWritable()) {
 	PacketPtr writeclean_pkt = writecleanBlk(blk, pkt->req->getDest(), pkt->id);
@@ -442,10 +442,26 @@ l3_size: 128kB, 1MB (其餘的cache size follow benchmark規定)
 replacement policy: LRU, FBRP
 ```
 
-Command (take l3_size=1MB as an example):
+<!--Command (take l3_size=1MB as an example):
 ```shell
 ./build/X86/gem5.opt configs/example/se.py -c tests/test-progs/benchmark/multiply --cpu-type=TimingSimpleCPU --caches --l2cache --l3cache --l3_assoc=4 --l1i_size=32kB --l1d_size=32kB --l2_size=128kB --l3_size=1MB --mem-type=NVMainMemory --nvmain-config=../NVmain/Config/PCM_ISSCC_2012_4GB.config > NVMain.log
-```
+``` -->
+
+Key points:
+- ./src/mem/packet.hh
+  ```c++
+    void setWriteThrough()
+    {
+        assert(cmd.isWrite() &&
+               (cmd.isEviction() || cmd == MemCmd::WriteClean));
+        flags.set(WRITE_THROUGH);
+    }
+  ```
+
+Result & Analysis:
+- 不論size和replacement policy，write through的write request皆比write back多 => write through每次都要寫回
+- 只有write through的stat.txt中有WriteClean相關的資料
+- write back的write request次數受size的影響較write through大
 
 ### Bonus
-還沒做，目前的結果是測試LFU、FBRP、LRU分別用write back/write through三者的差異
+還沒做，目前的結果是測試LFU、FBRP、LRU分別用write back/write through時三者的energy consumption差異
