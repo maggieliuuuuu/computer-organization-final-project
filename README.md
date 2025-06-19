@@ -419,3 +419,6 @@ Command (take l3_size=1MB as an example):
 ```shell
 ./build/X86/gem5.opt configs/example/se.py -c tests/test-progs/benchmark/multiply --cpu-type=TimingSimpleCPU --caches --l2cache --l3cache --l3_assoc=4 --l1i_size=32kB --l1d_size=32kB --l2_size=128kB --l3_size=1MB --mem-type=NVMainMemory --nvmain-config=../NVmain/Config/PCM_ISSCC_2012_4GB.config > NVMain.log
 ```
+
+### Bonus
+還沒做，目前的結果是測試LFU、FBRP、LRU分別用write back/write through三者的差異
