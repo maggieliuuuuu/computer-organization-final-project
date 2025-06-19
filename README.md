@@ -10,11 +10,11 @@ Key points:
 
 ### Q2
 Modify the following files:
-- Options.py
+- ./configs/common/Options.py
   ```python
   parser.add_option("--l3cache", action="store_true")
   ```
-- Caches.py
+- ./configs/common/Caches.py
   ```python
   class L3Cache(Cache):
     assoc = 8
@@ -25,7 +25,7 @@ Modify the following files:
     tgts_per_mshr = 12
     write_buffers = 8
   ```
-- Xbar.py
+- ./src/mem/Xbar.py
   ```python
   class L3XBar(CoherentXBar):
     width = 32
@@ -39,7 +39,7 @@ Modify the following files:
 
     point_of_unification = True
   ```
-- BaseCPU.py
+- ./src/cpu/BaseCPU.py
   ```python
   from XBar import L3XBar
   ```
@@ -53,7 +53,7 @@ Modify the following files:
     self.toL3Bus.master = self.l3cache.cpu_side
     self._cached_ports = ['l3cache.mem_side']
   ```
-- CacheConfig.py
+- ./configs/common/CacheConfig.py
   ```python
           dcache_class, icache_class, l2_cache_class, l3_cache_class, walk_cache_class = \
             O3_ARM_v7a_DCache, O3_ARM_v7a_ICache, O3_ARM_v7aL2, \
@@ -92,10 +92,15 @@ Modify the following files:
         system.l2.mem_side = system.membus.slave
   ```
 
-Command (add --l3cache):
+<!--Command (add --l3cache):
 ```shell
 ./build/X86/gem5.opt configs/example/se.py -c tests/test-progs/hello/bin/x86/linux/hello --cpu-type=TimingSimpleCPU --caches --l2cache --l3cache --mem-type=NVMainMemory --nvmain-config=../NVmain/Config/PCM_ISSCC_2012_4GB.config > NVMain.log
-```
+``` -->
+
+Key points:
+- BaseCPU.py: "The system can only use the L3 cache when the L2 cache is already used."
+- The other files just imitate L2 cache to enable L3 cache.
+- Add "--l3cache" in the command.
 
 ### Q3
 ```
