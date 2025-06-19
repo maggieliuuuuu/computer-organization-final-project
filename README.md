@@ -464,4 +464,15 @@ Result & Analysis:
 - write back的write request次數受size的影響較write through大
 
 ### Bonus
-還沒做，目前的結果是測試LFU、FBRP、LRU分別用write back/write through時三者的energy consumption差異
+還沒做，目前只測試了LFU、FBRP、LRU三者的energy consumption差異
+
+不管size、write policy為何，跑hello時都看不出差異
+
+用128kB大小、write back跑quicksort時，三者的active energy和write request次數如下:
+
+| replacement policy | active energy | write request |
+| - | - | - |
+| FBRP | 151.438nJ | 16050 |
+| LFU | 143.156nJ | 13129 |
+| LRU | 139.583nJ | 16411 |
+
